@@ -26,24 +26,24 @@ object FunSets {
    * Returns the union of the two given sets,
    * the sets of all elements that are in either `s` or `t`.
    */
-  def union(s: Set, t: Set): Set = (x: Int) => (s(x) || t(x))
+  def union(s: Set, t: Set): Set = (x: Int) => s(x) || t(x)
 
   /**
    * Returns the intersection of the two given sets,
    * the set of all elements that are both in `s` and `t`.
    */
-  def intersect(s: Set, t: Set): Set = (x: Int) => (s(x) && t(x))
+  def intersect(s: Set, t: Set): Set = (x: Int) => s(x) && t(x)
 
   /**
    * Returns the difference of the two given sets,
    * the set of all elements of `s` that are not in `t`.
    */
-  def diff(s: Set, t: Set): Set = (x: Int) => (s(x) && !t(x))
+  def diff(s: Set, t: Set): Set = (x: Int) => s(x) && !t(x)
 
   /**
    * Returns the subset of `s` for which `p` holds.
    */
-  def filter(s: Set, p: Int => Boolean): Set = (x: Int) => (s(x) && p(x))
+  def filter(s: Set, p: Int => Boolean): Set = (x: Int) => s(x) && p(x)
 
   /**
    * The bounds for `forall` and `exists` are +/- 1000.
@@ -55,13 +55,14 @@ object FunSets {
    */
   def forall(s: Set, p: Int => Boolean): Boolean = {
     def iter(a: Int): Boolean = {
+      // If reach upper bound, must be true.
       if (a > bound) true
-      // If fail predicate, then know that false.
-      else if (s(a) && p(a)) iter(a + 1)
+      // If in set and fail predicate, then know that false.
+      else if (contains(s, a) && !p(a)) false
       // Else go to next int.
-      else false
+      else iter(a + 1)
     }
-    // Start at bottom boundary. 
+    // Start at bottom bound. 
     iter(-bound)
   }
 
@@ -69,12 +70,16 @@ object FunSets {
    * Returns whether there exists at least 1 bounded integer within `s`
    * that satisfies `p`.
    * 
-   * An element of s satisfies p if not all elements fail p.
+   * An element of s satisfies p if not all elements fail p. That is, if it is 
+   * not the case that for all x in s, x is not p, then it must be the case that 
+   * there is some x in s that *is* p.
    */
-  def exists(s: Set, p: Int => Boolean): Boolean = !forall(s, (x: Int) => (!p(x)))
+  def exists(s: Set, p: Int => Boolean): Boolean = !forall(s, (x: Int) => !p(x))
 
   /**
    * Returns a set transformed by applying `f` to each element of `s`.
+   * 
+   * y is in the resulting set if it can be had from applying f to some x in s.
    */
   def map(s: Set, f: Int => Int): Set = (y: Int) => exists(s, (x: Int) => f(x) == y)
 

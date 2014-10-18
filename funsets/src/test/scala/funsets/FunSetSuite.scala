@@ -134,4 +134,74 @@ class FunSetSuite extends FunSuite {
       assert(!contains(t2, 2), "Diff 4")
     }
   }
+  
+  test("filter returns the subset for which the predicate holds") {
+    new TestSets {
+      // {1, 2}
+      val s = union(s1, s2)
+      // {1, 2, 3}
+      val t = union(s, s3)
+      val less3 = (x: Int) => (x < 3)
+      val ans = filter(s, less3)
+      val ans2 = filter(t, less3)
+      assert(ans(2), "Filter 1")
+      assert(ans(1), "Filter 2")
+      assert(!ans(3), "Filter 3")
+      assert(ans2(2), "Filter 4")
+      assert(ans2(1), "Filter 5")
+      assert(!ans2(3), "Filter 6")
+    }
+  }
+  
+  test("forall returns whether all bounded integers in set satisfy predicate") {
+    new TestSets {
+      // {1, 2}
+      val s = union(s1, s2)
+      // {1, 2, 3}
+      val t = union(s, s3)
+      // The predicates.
+      val less3 = (x: Int) => (x < 3)
+      val great0 = (x: Int) => (x > 0)
+      assert(forall(s, less3), "Forall 1")
+      assert(forall(s, great0), "Forall 2")
+      assert(!forall(t, less3), "Forall 3")
+      assert(forall(t, great0), "Forall 4")
+    }
+  }
+  
+  test("exists returns whether there exists some x in set that satisfies predicate") {
+    new TestSets {
+      // {1, 2}
+      val s = union(s1, s2)
+      // {1, 2, 3}
+      val t = union(s, s3)
+      // The predicates.
+      val less3 = (x: Int) => (x < 3)
+      val great0 = (x: Int) => (x > 0)
+      val great3 = (x: Int) => (x > 3)
+      assert(exists(s, less3), "Exists 1")
+      assert(exists(s, great0), "Exists 2")
+      assert(!exists(s, great3), "Exists 3")
+      assert(exists(t, less3), "Exists 4")
+      assert(exists(t, great0), "Exists 5")
+      assert(!exists(t, great3), "Exists 6")
+    }
+  }
+
+  test("map returns a set transformed by applying a function to each x in s") {
+    new TestSets {
+      // {1, 2}
+      val s = union(s1, s2)
+      // {1, 2, 3}
+      val t = union(s, s3)
+      // The function.
+      val plus1 = (x: Int) => (x + 1)
+      val sPlus1 = map(s, plus1)
+      val tPlus1 = map(t, plus1)
+      assert(sPlus1(3), "Map 1")
+      assert(!sPlus1(4), "Map 2")
+      assert(tPlus1(4), "Map 3")
+      assert(!tPlus1(5), "Map 3")
+    }
+  }
 }
