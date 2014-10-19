@@ -69,16 +69,16 @@ object FunSets {
   /**
    * Returns whether there exists at least 1 bounded integer within `s`
    * that satisfies `p`.
-   * 
-   * An element of s satisfies p if not all elements fail p. That is, if it is 
-   * not the case that for all x in s, x is not p, then it must be the case that 
+   *
+   * An element of s satisfies p if not all elements fail p. That is, if it is
+   * not the case that for all x in s, x is not p, then it must be the case that
    * there is some x in s that *is* p.
    */
   def exists(s: Set, p: Int => Boolean): Boolean = !forall(s, (x: Int) => !p(x))
 
   /**
    * Returns a set transformed by applying `f` to each element of `s`.
-   * 
+   *
    * y is in the resulting set if it can be had from applying f to some x in s.
    */
   def map(s: Set, f: Int => Int): Set = (y: Int) => exists(s, (x: Int) => f(x) == y)
