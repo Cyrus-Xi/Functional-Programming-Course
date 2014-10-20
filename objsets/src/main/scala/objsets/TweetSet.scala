@@ -39,33 +39,32 @@ abstract class TweetSet {
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
    *
-   * Can be implemented here because accumulator will always start empty.
+   * Can be implemented here because accumulator will always begin empty.
    */
   def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
 
   /**
-   * This is a helper method for `filter` that propagates the accumulated tweets.
+   * Helper method for `filter` that propagates the accumulated tweets.
    */
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
 
   /**
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
-   *
-   * Question: Should we implement this method here, or should it remain abstract
-   * and be implemented in the subclasses? Probably not.
    */
    def union(that: TweetSet): TweetSet
 
+   /**
+    * To conveniently differentiate between the two sub-classes.
+    */
+   def isEmpty: Boolean
+   
   /**
    * Returns the tweet from this set which has the greatest retweet count.
    *
    * Calling `mostRetweeted` on an empty set should throw an exception of
    * type `java.util.NoSuchElementException`.
-   *
-   * Question: Should we implement this method here, or should it remain abstract
-   * and be implemented in the subclasses?
    */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -76,7 +75,7 @@ abstract class TweetSet {
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
 
   /**
    * Returns a new `TweetSet` which contains all elements of this set, and the
@@ -108,11 +107,17 @@ class Empty extends TweetSet {
    * Helper function for filter. Doesn't add to accumulator, just returns it.
    */
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
-
+  
   /**
    * If empty, then the elements in either set are just those in that.
    */
   def union(that: TweetSet): TweetSet = that
+  
+  def isEmpty: Boolean = true
+  
+  def mostRetweeted = throw new NoSuchElementException("Empty set")
+  
+  def descendingByRetweet: TweetList = Nil
   
   def contains(tweet: Tweet): Boolean = false
 
@@ -137,7 +142,23 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
    * Tail recursive.
    */
   def union(that: TweetSet): TweetSet = right.union(left.union(that.incl(elem)))
+  
+  def isEmpty: Boolean = false
 
+  def mostRetweeted: Tweet = {
+    def moreRetweeted(curr: Tweet, other: Tweet): Tweet = {
+      if (curr.retweets >= other.retweets) curr else other
+    }
+    if (left.isEmpty && right.isEmpty) elem
+    else if (left.isEmpty) moreRetweeted(elem, right.mostRetweeted)
+    else if (right.isEmpty) moreRetweeted(elem, left.mostRetweeted)
+    else moreRetweeted(moreRetweeted(elem, left.mostRetweeted), right.mostRetweeted)
+  }
+  
+  def descendingByRetweet: TweetList = {
+    new Cons(this.mostRetweeted, this.remove(this.mostRetweeted).descendingByRetweet)
+  }
+  
   /**
    * If "bottoms out" to Empty, then know that false.
    */
