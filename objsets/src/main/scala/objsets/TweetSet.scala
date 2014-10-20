@@ -39,8 +39,7 @@ abstract class TweetSet {
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
    *
-   * Question: Can we implement this method here, or should it remain abstract
-   * and be implemented in the subclasses?
+   * Can be implemented here because accumulator will always start empty.
    */
   def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
 
@@ -52,10 +51,10 @@ abstract class TweetSet {
   /**
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
-   * and be implemented in the subclasses?
+   * Question: Should we implement this method here, or should it remain abstract
+   * and be implemented in the subclasses? Probably not.
    */
-   def union(that: TweetSet): TweetSet = ???
+   def union(that: TweetSet): TweetSet
 
   /**
    * Returns the tweet from this set which has the greatest retweet count.
@@ -63,7 +62,7 @@ abstract class TweetSet {
    * Calling `mostRetweeted` on an empty set should throw an exception of
    * type `java.util.NoSuchElementException`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
   def mostRetweeted: Tweet = ???
@@ -74,15 +73,10 @@ abstract class TweetSet {
    * have the highest retweet count.
    *
    * Hint: the method `remove` on TweetSet will be very useful.
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
   def descendingByRetweet: TweetList = ???
-
-
-  /**
-   * The following methods are already implemented
-   */
 
   /**
    * Returns a new `TweetSet` which contains all elements of this set, and the
@@ -111,15 +105,14 @@ abstract class TweetSet {
 class Empty extends TweetSet {
 
   /**
-   * Helper function for filter.
+   * Helper function for filter. Doesn't add to accumulator, just returns it.
    */
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
 
-  //def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, this)
- 
   /**
-   * The following methods are already implemented
+   * If empty, then the elements in either set are just those in that.
    */
+  def union(that: TweetSet): TweetSet = that
   
   def contains(tweet: Tweet): Boolean = false
 
@@ -132,14 +125,18 @@ class Empty extends TweetSet {
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
+  /**
+   * Helper function for filter. Recursive; goes down left side first then right.
+   */
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
     if (p(elem)) right.filterAcc(p, left.filterAcc(p, acc.incl(elem)))
     else right.filterAcc(p, left.filterAcc(p, acc))
   }
 
   /**
-   * The following methods are already implemented
+   * Tail recursive.
    */
+  def union(that: TweetSet): TweetSet = right.union(left.union(that.incl(elem)))
 
   /**
    * If "bottoms out" to Empty, then know that false.
