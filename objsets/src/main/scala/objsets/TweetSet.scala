@@ -14,24 +14,13 @@ class Tweet(val user: String, val text: String, val retweets: Int) {
 
 /**
  * This represents a set of objects of type `Tweet` in the form of a binary search
- * tree. Every branch in the tree has two children (two `TweetSet`s). There is an
- * invariant which always holds: for every branch `b`, all elements in the left
- * subtree are smaller than the tweet at `b`. The eleemnts in the right subtree are
- * larger.
+ * tree. Every branch in the tree has two children (two `TweetSet`s). 
  *
  * Note that the above structure requires us to be able to compare two tweets (we
  * need to be able to say which of two tweets is larger, or if they are equal). In
  * this implementation, the equality / order of tweets is based on the tweet's text
  * (see `def incl`). Hence, a `TweetSet` could not contain two tweets with the same
  * text from different users.
- *
- *
- * The advantage of representing sets as binary search trees is that the elements
- * of the set can be found quickly. If you want to learn more you can take a look
- * at the Wikipedia page [1], but this is not necessary in order to solve this
- * assignment.
- *
- * [1] http://en.wikipedia.org/wiki/Binary_search_tree
  */
 abstract class TweetSet {
 
@@ -60,9 +49,6 @@ abstract class TweetSet {
    
   /**
    * Returns the tweet from this set which has the greatest retweet count.
-   *
-   * Calling `mostRetweeted` on an empty set should throw an exception of
-   * type `java.util.NoSuchElementException`.
    */
   def mostRetweeted: Tweet
 
@@ -70,10 +56,6 @@ abstract class TweetSet {
    * Returns a list containing all tweets of this set, sorted by retweet count
    * in descending order. In other words, the head of the resulting list should
    * have the highest retweet count.
-   *
-   * Hint: the method `remove` on TweetSet will be very useful.
-   * Question: Should we implement this method here, or should it remain abstract
-   * and be implemented in the subclasses?
    */
   def descendingByRetweet: TweetList
 
@@ -117,6 +99,9 @@ class Empty extends TweetSet {
   
   def mostRetweeted = throw new NoSuchElementException("Empty set")
   
+  /**
+   * Empty set returns empty list.
+   */
   def descendingByRetweet: TweetList = Nil
   
   def contains(tweet: Tweet): Boolean = false
@@ -145,16 +130,25 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   
   def isEmpty: Boolean = false
 
+  /**
+   * Helper function for descendingByRetweet. Returns most retweeted Tweet in set.
+   */
   def mostRetweeted: Tweet = {
+    // Helper function to compare Tweets by number of retweets.
     def moreRetweeted(curr: Tweet, other: Tweet): Tweet = {
       if (curr.retweets >= other.retweets) curr else other
     }
+    // Use isEmpty methods for convenience and proceed recursively.
     if (left.isEmpty && right.isEmpty) elem
     else if (left.isEmpty) moreRetweeted(elem, right.mostRetweeted)
     else if (right.isEmpty) moreRetweeted(elem, left.mostRetweeted)
     else moreRetweeted(moreRetweeted(elem, left.mostRetweeted), right.mostRetweeted)
   }
-  
+ 
+  /**
+   * Get most retweeted Tweet in set. Remove that tweet and add to result list by 
+   * creating a new Cons. After that, repeat recursively with the now smaller set.
+   */
   def descendingByRetweet: TweetList = {
     new Cons(this.mostRetweeted, this.remove(this.mostRetweeted).descendingByRetweet)
   }
