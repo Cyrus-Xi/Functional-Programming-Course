@@ -205,6 +205,7 @@ object GoogleVsApple {
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
+  // The tweets that contain a keyword in google.
   lazy val googleTweets: TweetSet = {
     TweetReader.allTweets.filter((x: Tweet) => google.exists(x.text.contains))
   }
